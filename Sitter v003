@@ -1,0 +1,27 @@
+integer MyChannel = 666;
+
+default
+{
+    state_entry()
+    {
+        llSitTarget(<0.7, 0.0, -0.05>, <0.00000, 0.08716, 0.00000, 0.99619>); 
+    }
+    changed(integer change)
+    {
+        if (change & CHANGED_LINK)
+        { 
+            key av_sit = llAvatarOnSitTarget();
+            if (av_sit) 
+            {
+               llRegionSay(MyChannel,"sit!");
+//test               llOwnerSay("sit");
+            }
+            if (av_sit == NULL_KEY)
+            {
+                llRegionSay(MyChannel,"stand!");
+//test                llOwnerSay("stand");
+            }
+        }
+    }
+}
+ 
