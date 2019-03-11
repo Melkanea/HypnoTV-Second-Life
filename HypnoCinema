@@ -1,0 +1,165 @@
+//===========================//
+//Melkaneas HypnoCinema v0.15//
+//===========================//
+
+//=========OVERVIEW==========// 
+//As part of multiple objects
+//notecard reader to list 
+//set URL from list as Prim Media URL, 
+//timer to compensate and add delay, 
+//restart at end of list
+//Recieves and sends triggers on channel
+//===========================//
+//Melkaneas Brandyphilias Logo
+string ImgURL = "https://jerking.empornium.ph/images/2019/03/08/1600_900SecondLife.png";
+//default Prim settings
+vector color = <1.0, 1.0, 1.0>;
+integer face = 1;
+integer counter = -1;
+//URL set variables
+string url;
+//TIMER set for testing purposes increase to enjoy the spirals
+float time = 10.0;
+//SCRIPT COMUNICATION
+integer MyChannel = 666;
+
+// Generic Multi Notecard reader by Brangus Weir
+// http://wiki.secondlife.com/wiki/LlGetNotecardLine
+// Shortened by Melkanea to read only one card
+list gOneCard;                          //the list the notecard get stored in
+string gsCardOneName = "HypnoTVlist";   //NOTECARD NAME
+string g_sNoteCardName; 
+list g_lTempLines;     
+integer g_iLine;       
+key g_kQuery;
+
+initialize(string _action) 
+{
+    if (_action == "") 
+        {
+        loadNoteCard(gsCardOneName);
+        } 
+    else if (_action == "finish")
+        {
+        integer len = llGetListLength(gOneCard);
+        } 
+}
+loadNoteCard(string _notecard ) 
+{
+    g_lTempLines = []; 
+    g_sNoteCardName = _notecard;
+    g_iLine = 0;
+    g_kQuery = llGetNotecardLine(g_sNoteCardName, g_iLine); 
+}
+notecardFinished(string _notecard)
+{
+    if (_notecard == gsCardOneName)
+    {
+        gOneCard = g_lTempLines;
+        initialize("finish");
+    }    
+}
+//end of notecard reader
+
+//Melkaneas Magic
+//Set Prim media to string read from list feed by notecard
+//lists start at 0, counter starts at 1 to avoid default texture to be set at counter 0 [seems dumb but it works]
+//defines the current URL based on counter
+setURLtoList(string url) 
+{   
+    integer urlcounter = counter -1; 
+    string url = llList2String(gOneCard, urlcounter); 
+//test    llOwnerSay((string)counter + " " + (string)url);
+    llSetPrimMediaParams(face, 
+        [PRIM_MEDIA_CURRENT_URL, url ] );
+}
+
+default
+{   
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
+    state_entry() //sets default prim media, disable browser menu
+    {   
+        llSetColor(color, face);
+        llSetPrimitiveParams( 
+                [PRIM_GLOW, face, .05 ] );
+        llOwnerSay("Welcome to Melkaneas HypnoCinema");
+        llSetPrimMediaParams(face, 
+                [PRIM_MEDIA_CURRENT_URL, ImgURL,
+                 PRIM_MEDIA_AUTO_PLAY,TRUE,
+                 PRIM_MEDIA_PERMS_CONTROL, PRIM_MEDIA_PERM_NONE ] );
+        llListen(MyChannel,"","",""); 
+    }
+    listen(integer channel, string name, key id, string message)    
+    {       
+        if (message == "sit!")
+        {  
+//test        llSay(0,"Eeep!  Someone said "+message+" and scared me.");
+        llOwnerSay("sit!"); 
+        state hypno;                
+        }
+    }
+}
+state hypno
+{   
+    state_entry()
+    {
+        llOwnerSay("HYPNO STATE");
+        initialize("");  //Notecard reader Init 
+        llListen(MyChannel,"","","");
+         
+        if (counter != 0) //skips counter 0 or URL will fail and give empty texture
+        {
+         //Sets Prim media from list read from notecard 
+        integer lenght = llGetListLength(gOneCard); //How can i only check it once? [WHELP!]
+            if (counter == lenght)
+            {
+                counter = 0;
+            }         
+        }
+    }
+    dataserver(key _query_id, string _data) //dataserver part of notecard reader
+    {
+        if (_query_id == g_kQuery) 
+            {
+            if (_data != EOF) 
+                {    
+                g_lTempLines += _data;
+                ++g_iLine;
+                g_kQuery = llGetNotecardLine(g_sNoteCardName, g_iLine);
+                } 
+            else 
+                {
+                notecardFinished(g_sNoteCardName);
+                }
+            }
+    }  
+    listen(integer channel, string name, key id, string message)    
+    {       
+    if (message == "boo!")
+    {  
+//test        llSay(0,"Eeep!  Someone said "+message+" and scared me."); 
+        ++counter;
+        setURLtoList("");
+        llRegionSay(MyChannel,"buu!");
+//test        llOwnerSay("buu!");                 
+    }
+    if (message == "baa!")
+        {  
+//test        llSay(0,"Ooop!  Someone said "+message+" and did not scare me."); 
+        --counter;  
+        setURLtoList(""); 
+        llRegionSay(MyChannel,"bii!");
+//test        llOwnerSay("bii!");  
+               
+        }
+     if (message == "stand!")
+        {  
+//test       llSay(0,"Eeep!  Someone said "+message+" and scared me.");
+//test        llOwnerSay("stand!"); 
+        state default;                
+        }    
+    }       
+}
