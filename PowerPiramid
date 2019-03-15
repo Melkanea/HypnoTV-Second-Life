@@ -1,6 +1,25 @@
 //===========================//
 //  Melkaneas POWER PYRAMID  //
 //===========================//
+
+//Thanks to:
+// Bouncing Prims
+// Nexii Malthus' http://wiki.secondlife.com/wiki/Interpolation/Cosine/Float
+// Generic Multi Notecard reader by Brangus Weir
+// http://wiki.secondlife.com/wiki/LlGetNotecardLine
+
+//========================OVERVIEW=========================================================================// 
+//Center spehere rotates while 6 pyramids are floating around                                              //
+//one piramid on each axis                                                                                 //
+//pyramids are roating and bouncing                                                                        //
+//objects changes color on control imput                                                                   //
+//invert rotation on comand                                                                                //
+//=====================================Glitches============================================================//
+//very resourse intensive. convert to mesh                                                                 //
+//on reseting script piraminds default positions becomes new position ruining bounce effect                //
+//reads list lenght on each color change,                                                                  //
+//=========================================================================================================//
+
 //default Prim settings
 vector color = <1.0, 1.0, 1.0>;
 vector color1;
@@ -9,12 +28,7 @@ integer counter = -1 ;
 //COMUNICATION
 integer MyChannel = 667;
 
-
-//========================OVERVIEW=======================9// 
-//Changes Color on Touch based on a notecard vector list  //
-//========================================================//
-// Generic Multi Notecard reader by Brangus Weir
-// http://wiki.secondlife.com/wiki/LlGetNotecardLine
+// Generic Multi Notecard reader
 // Shortened by Melkanea to read only one card
 list gOneCard;                     //the list the notecard gets stored in
 string gsCardOneName = "COLORS";   //NOTECARD NAME
@@ -52,7 +66,6 @@ notecardFinished(string _notecard)
 //end of notecard reader
 
 
-//Melkaneas
 //Set color to string read from list feed by notecard
 //lists start at 0, counter starts at 1 to avoid default color
 //defines the current color based on counter
@@ -74,7 +87,6 @@ setColortoList(string color)
         }
 }
 //Bouncing
-// from Nexii Malthus' http://wiki.secondlife.com/wiki/Interpolation/Cosine/Float
 list childOffsets;
 integer bouncing;
 integer expanding;
@@ -82,7 +94,7 @@ float travelPart = 1.0;
 
 float interp(float t)
 {   
-    // with range from 0.7 to 1.5 [modified range ]
+    // with range from 0.475 to 1.5 [modified range or overlaps sphere ]
     float F = (1-llCos(t*PI))/2;
     return 0.475*(1-F)+1.5*F;
 }
@@ -164,12 +176,11 @@ default
             setColortoList(""); 
 //test        llOwnerSay("buu!" + (string)color1);
             llSetColor(color1, face); 
-            llTargetOmega(<0,.2,0>,-PI,1.0);
-              
+            llTargetOmega(<0,.2,0>,-PI,1.0);              
         }   
         if (message == "stop")
         {
             llTargetOmega(<0,0,0>,PI,1.0);
         }
     }
-}﻿
+}
