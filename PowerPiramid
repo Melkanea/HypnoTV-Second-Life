@@ -87,7 +87,7 @@ setColortoList(string color)
         }
 }
 //Bouncing
-list childOffsets;
+list childOffsets = [<0.000000, 0.000000, -1.402121>,<0.000000, 1.402121, 0.000000>,<-1.402121, 0.000000, 0.000000>,<0.000000, -1.402121, 0.000000>,<0.000000, 0.000000, 1.402121>,<1.402121, 0.000000, 0.000000>];
 integer bouncing;
 integer expanding;
 float travelPart = 1.0;
@@ -96,7 +96,7 @@ float interp(float t)
 {   
     // with range from 0.475 to 1.5 [modified range or overlaps sphere ]
     float F = (1-llCos(t*PI))/2;
-    return 0.475*(1-F)+1.5*F;
+    return 0.35*(1-F)+1.0*F;
 }
     
 default
@@ -104,17 +104,15 @@ default
     state_entry()
     {   
 //melkaneas
-        llOwnerSay("Welcome to Melkaneas Color Changer");
+//test        llOwnerSay("Welcome to Melkaneas Color Changer");
         initialize("");  //Notecard reader Init 
         llListen(MyChannel,"","","");
         llSetPrimitiveParams( 
-                [PRIM_GLOW, face, .1 ] );
-        llSetTimerEvent(llList2Float([0.0, 0.1], bouncing = !bouncing)); 
+                [PRIM_GLOW, face, .001 ] ); 
                 
 //bouncing                
         integer childLink = llGetNumberOfPrims();
-        do
-            childOffsets = llList2Vector(llGetLinkPrimitiveParams(childLink, [PRIM_POS_LOCAL]), 0) + childOffsets;
+            
         while (1 < --childLink);
     }
     timer()
@@ -167,7 +165,8 @@ default
             setColortoList("");
 //test        llOwnerSay("buu!" + (string)color1);
             llSetColor(color1, face);
-            llTargetOmega(<0,.2,0>,PI,1.0);
+            llTargetOmega(<.4,.3,.2>,PI,1.0);
+            llSetTimerEvent(llList2Float([0.0, 0.1], bouncing = !bouncing));
         }        
         if (message == "left")
         {  
@@ -176,11 +175,14 @@ default
             setColortoList(""); 
 //test        llOwnerSay("buu!" + (string)color1);
             llSetColor(color1, face); 
-            llTargetOmega(<0,.2,0>,-PI,1.0);              
+            llTargetOmega(<.4,.3,.2>,-PI,1.0); 
+            llSetTimerEvent(llList2Float([0.0, 0.1], bouncing = !bouncing));             
         }   
         if (message == "stop")
         {
-            llTargetOmega(<0,0,0>,PI,1.0);
+          llTargetOmega(<.0,.0,.0>,-PI,1.0);;
+          llSetTimerEvent(llList2Float([0.0, 0.1], !bouncing));
+          llResetScript();
         }
     }
 }
