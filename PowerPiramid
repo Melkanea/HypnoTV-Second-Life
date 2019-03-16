@@ -3,8 +3,8 @@
 //===========================//
 
 //Thanks to:
-// Bouncing Prims
-// Nexii Malthus' http://wiki.secondlife.com/wiki/Interpolation/Cosine/Float
+// Bouncing Prims by Nexii Malthus
+// http://wiki.secondlife.com/wiki/Interpolation/Cosine/Float
 // Generic Multi Notecard reader by Brangus Weir
 // http://wiki.secondlife.com/wiki/LlGetNotecardLine
 
@@ -16,8 +16,7 @@
 //invert rotation on comand                                                                                //
 //=====================================Glitches============================================================//
 //very resourse intensive. convert to mesh                                                                 //
-//on reseting script piraminds default positions becomes new position ruining bounce effect                //
-//reads list lenght on each color change,                                                                  //
+//reads list lenght on each color change                                                                   //
 //=========================================================================================================//
 
 //default Prim settings
@@ -86,6 +85,7 @@ setColortoList(string color)
             } 
         }
 }
+
 //Bouncing
 list childOffsets = [<0.000000, 0.000000, -1.402121>,<0.000000, 1.402121, 0.000000>,<-1.402121, 0.000000, 0.000000>,<0.000000, -1.402121, 0.000000>,<0.000000, 0.000000, 1.402121>,<1.402121, 0.000000, 0.000000>];
 integer bouncing;
@@ -94,9 +94,9 @@ float travelPart = 1.0;
 
 float interp(float t)
 {   
-    // with range from 0.475 to 1.5 [modified range or overlaps sphere ]
+    // with range from 0.31 to 1.0 [modified range or overlaps sphere ]
     float F = (1-llCos(t*PI))/2;
-    return 0.35*(1-F)+1.0*F;
+    return 0.31*(1-F)+1.0*F;
 }
     
 default
@@ -160,29 +160,42 @@ default
     {       
      if (message == "right")
         {  
-//test        llSay(0,"Eeep!  Someone said "+message+" and scared me."); 
             ++counter;
             setColortoList("");
-//test        llOwnerSay("buu!" + (string)color1);
-            llSetColor(color1, face);
+            llSetLinkPrimitiveParams(LINK_SET, [ PRIM_COLOR, face, color1, 1.0 ] ) ;
+            
+            llSetLinkPrimitiveParams(2, [PRIM_OMEGA, <0,0,.2>, -PI, 1.0] ) ;
+            llSetLinkPrimitiveParams(3, [PRIM_OMEGA, <0,.2,0>, PI, 1.0] ) ;
+            llSetLinkPrimitiveParams(4, [PRIM_OMEGA, <.2,0,0>, PI, 1.0] ) ;
+            llSetLinkPrimitiveParams(5, [PRIM_OMEGA, <0,.2,0>, -PI, 1.0] ) ;
+            llSetLinkPrimitiveParams(6, [PRIM_OMEGA, <0,0,.2>, PI, 1.0] ) ;
+            llSetLinkPrimitiveParams(7, [PRIM_OMEGA, <.2,0,0>, -PI, 1.0] ) ;
             llTargetOmega(<.4,.3,.2>,PI,1.0);
+        
+    
             llSetTimerEvent(llList2Float([0.0, 0.1], bouncing = !bouncing));
         }        
         if (message == "left")
-        {  
-//test        llSay(0,"Ooop!  Someone said "+message+" and did not scare me."); 
+        { 
             --counter;  
             setColortoList(""); 
-//test        llOwnerSay("buu!" + (string)color1);
-            llSetColor(color1, face); 
-            llTargetOmega(<.4,.3,.2>,-PI,1.0); 
+
+            llSetLinkPrimitiveParams(LINK_SET, [ PRIM_COLOR, face, color1, 1.0 ] ) ;
+            
+            llSetLinkPrimitiveParams(2, [PRIM_OMEGA, <0,0,.2>, PI, 1.0] ) ;
+            llSetLinkPrimitiveParams(3, [PRIM_OMEGA, <0,.2,0>, -PI, 1.0] ) ;
+            llSetLinkPrimitiveParams(4, [PRIM_OMEGA, <.2,0,0>, -PI, 1.0] ) ;
+            llSetLinkPrimitiveParams(5, [PRIM_OMEGA, <0,.2,0>, PI, 1.0] ) ;
+            llSetLinkPrimitiveParams(6, [PRIM_OMEGA, <0,0,.2>, -PI, 1.0] ) ;
+            llSetLinkPrimitiveParams(7, [PRIM_OMEGA, <.2,0,0>, PI, 1.0] ) ;
+            llTargetOmega(<.4,.3,.2>,-PI,1.0);
+             
             llSetTimerEvent(llList2Float([0.0, 0.1], bouncing = !bouncing));             
         }   
         if (message == "stop")
         {
           llTargetOmega(<.0,.0,.0>,-PI,1.0);;
           llSetTimerEvent(llList2Float([0.0, 0.1], !bouncing));
-          llResetScript();
         }
     }
 }
